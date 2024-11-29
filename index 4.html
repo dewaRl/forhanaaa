@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Cinta</title>
+    <style>
+        :root {
+            --primary: #ff4d8c;
+            --primary-hover: #ff3377;
+            --background: linear-gradient(135deg, #ffe6ee 0%, #ffb3cc 100%);
+            --text: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .title {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #666;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 77, 140, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalEnter 0.3s ease-out;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: var(--text);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: toastEnter 0.5s ease-out;
+            text-align: center;
+            min-width: 300px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes toastEnter {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        @keyframes modalEnter {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            .title { font-size: 2rem; }
+            .modal-content { max-width: 95%; margin: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="welcome-screen" class="screen active">
+            <h1 class="title">Puzzle Cinta</h1>
+            <p class="subtitle">selamat datang di permainan ala dewdew.</p>
+            <button class="btn primary" onclick="startGame()">
+                <span class="heart-icon">❤️</span>
+                Mulai Permainan
+            </button>
+        </div>
+
+        <div id="puzzle-screen" class="screen">
+            <h2>Level 1: Pertanyaan Cinta</h2>
+            <p class="subtitle">Apakah kamu mencintaiku?</p>
+            <div class="quiz-options">
+                <button class="btn" onclick="handleAnswer('!yes')">!yes</button>
+                <button class="btn" onclick="handleAnswer('!no')">!no</button>
+            </div>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <h2>Level 2: Pertanyaan Cinta</h2>
+            <p>Apa warna kesukaanku?</p>
+            <div class="quiz-options">
+                <button class="btn" onclick="checkAnswer('pink', true)">jingga dejek</button>
+                <button class="btn" onclick="checkAnswer('blue', false)">hijau bonek</button>
+                <button class="btn" onclick="checkAnswer('green', false)">biru persib</button>
+            </div>
+        </div>
+
+        <div id="word-screen" class="screen">
+            <h2>Level 3:Pertanyaan Cinta</h2>
+            <p>dewa sayang hana karena ____</p>
+            <div class="word-options">
+                <button class="btn" onclick="selectWord('cantik')">imoett</button>
+                <button class="btn" onclick="selectWord('sigma')">sigma pisan</button>
+                <button class="btn" onclick="selectWord('botolyakult')">botolyakult</button>
+                <button class="btn" onclick="selectWord('semuanya')">semuanya</button>
+            </div>
+        </div>
+
+        <div id="gift-screen" class="screen">
+            <h2>Hadiah Spesial</h2>
+            <p>Selamat bubub! bububb berhasil menyelesaikan Puzzle Cinta. Klik kotak ini untuk membuka kejutan.</p>
+            <button class="gift-box" onclick="openGift()">
+                <span class="gift-icon">🎁</span>
+                <span>Buka Hadiah</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="love-letter" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeLoveLetter()">&times;</span>
+            <div class="letter-content"></div>
+        </div>
+    </div>
+
+    <div id="floating-hearts"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        let currentStep = 'welcome';
+        let yesClickCount = 0;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId + '-screen').classList.add('active');
+            currentStep = screenId;
+        }
+
+        function startGame() {
+            showScreen('puzzle');
+            createConfetti();
+        }
+
+        function handleAnswer(answer) {
+            if (answer === '!yes') {
+                yesClickCount++;
+                if (yesClickCount === 1) {
+                    showToast("Wahh kirain kamu pinter ngoding/pemrograman sepertiku! 😄", 2000);
+                } else {
+                    showToast("!yes bukan berarti yes sungguhan dalam pemrograman. !yes = false = no 😉", 2000);
+                }
+            } else if (answer === '!no') {
+                createConfetti();
+                showScreen('quiz');
+                showToast('Kamu benar! Dalam pemrograman, !no berarti yes! 💖', 2000);
+            }
+        }
+
+        function showToast(message, duration = 3000) {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'toastEnter 0.5s ease-out reverse';
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }, duration);
+        }
+
+        function createConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function checkAnswer(answer, isCorrect) {
+            if (isCorrect) {
+                createConfetti();
+                showScreen('word');
+                showToast('Jawaban yang tepat! 💖');
+            } else {
+                showToast('Coba lagi ya! 💝', 'error');
+            }
+        }
+
+        function selectWord(word) {
+            if (word === 'semuanya') {
+                createConfetti();
+                showScreen('gift');
+                showToast('Ya! Aku cinta kamu karena semuanya. Kamu sempurna! 💖');
+            } else {
+                showToast('Hmm... coba pilih yang lain! 💝', 'info');
+            }
+        }h
+
+        function openGift() {
+            createConfetti();
+            document.getElementById('love-letter').style.display = 'flex';
+            document.querySelector('.letter-content').textContent = LOVE_LETTER_CONTENT;
+        }
+
+        function closeLoveLetter() {
+            document.getElementById('love-letter').style.display = 'none';
+        }
+
+        const LOVE_LETTER_CONTENT = `hallo sayangg,
+
+
+aku cuma mau bilang betapa bersyukurnya aku memiliki kamu🥺.,🤩 dan tetap jadi versi terbaik dirimu😍.aku merasa hadiah yang terindah itu kamu⁉️🫶🏻 makasii banget udah menerima aku apaadanya🥰,aku akan selalu berusaha jadi orang yang membuatmu bahagia seperti kamu membuatku❤️‍🩹❤.makasi bubb karena selalu ada untukku. makasii juga sudah mencintaiku dengan caramu.
+[dewa sayang hana]`;
+    </script>
+</body>
+</htmlMIT 
